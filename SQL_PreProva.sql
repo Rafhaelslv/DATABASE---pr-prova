@@ -40,7 +40,7 @@ FOREIGN KEY (codEstoque) REFERENCES estoque (codigo)
 GO
 INSERT INTO editora VALUES
 (1,'Pearson','www.pearson.com.br'),
-(2,'Civilização Brasileira',NULL),
+(2,'Civilizaï¿½ï¿½o Brasileira',NULL),
 (3,'Makron Books','www.mbooks.com.br'),
 (4,'LTC','www.ltceditora.com.br'),
 (5,'Atual','www.atualeditora.com.br'),
@@ -49,21 +49,21 @@ GO
 INSERT INTO autor VALUES
 (101,'Andrew Tannenbaun','Desenvolvedor do Minix'),
 (102,'Fernando Henrique Cardoso','Ex-Presidente do Brasil'),
-(103,'Diva Marília Flemming','Professora adjunta da UFSC'),
+(103,'Diva Marï¿½lia Flemming','Professora adjunta da UFSC'),
 (104,'David Halliday','Ph.D. da University of Pittsburgh'),
-(105,'Alfredo Steinbruch','Professor de Matemática da UFRS e da PUCRS'),
-(106,'Willian Roberto Cereja','Doutorado em Lingüística Aplicada e Estudos da Linguagem'),
-(107,'William Stallings','Doutorado em Ciências da Computacão pelo MIT'),
+(105,'Alfredo Steinbruch','Professor de Matemï¿½tica da UFRS e da PUCRS'),
+(106,'Willian Roberto Cereja','Doutorado em Lingï¿½ï¿½stica Aplicada e Estudos da Linguagem'),
+(107,'William Stallings','Doutorado em Ciï¿½ncias da Computacï¿½o pelo MIT'),
 (108,'Carlos Morimoto','Criador do Kurumin Linux')
 GO
 INSERT INTO estoque VALUES
 (10001,'Sistemas Operacionais Modernos ',4,108.00,1,101),
-(10002,'A Arte da Política',2,55.00,2,102),
+(10002,'A Arte da Polï¿½tica',2,55.00,2,102),
 (10003,'Calculo A',12,79.00,3,103),
-(10004,'Fundamentos de Física I',26,68.00,4,104),
-(10005,'Geometria Analítica',1,95.00,3,105),
-(10006,'Gramática Reflexiva',10,49.00,5,106),
-(10007,'Fundamentos de Física III',1,78.00,4,104),
+(10004,'Fundamentos de Fï¿½sica I',26,68.00,4,104),
+(10005,'Geometria Analï¿½tica',1,95.00,3,105),
+(10006,'Gramï¿½tica Reflexiva',10,49.00,5,106),
+(10007,'Fundamentos de Fï¿½sica III',1,78.00,4,104),
 (10008,'Calculo B',3,95.00,3,103)
 GO
 INSERT INTO compra VALUES
@@ -78,52 +78,60 @@ INSERT INTO compra VALUES
 (15054,10008,1,95.00,'06/08/2021')
 GO
 
---1) Consultar nome, valor unitário, nome da editora e nome do autor dos livros do estoque que foram vendidos. Não podem haver repetições.
-SELECT l.nome, l.valor, ed.nome, a.nome
-FROM estoque l, editora ed, autor a, compra c
+--1) Consultar nome, valor unitï¿½rio, nome da editora e nome do autor dos livros do estoque que foram vendidos. Nï¿½o podem haver repetiï¿½ï¿½es.
+SELECT e.nome, e.valor, edi.nome, a.nome
+FROM estoque e
+INNER JOIN editora edi on edi.codigo = e.codEditora
+INNER JOIN autor a on a.codigo = e.codAutor
+INNER JOIN compra c on c.codEstoque = e.codigo
+WHERE e.codigo = c.codEstoque
 
-where c.codEstoque is null
+--2) Consultar nome do livro, quantidade comprada e valor de compra da compra 15051
+SELECT e.nome, e.quantidade, c.valor
+FROM estoque e
+INNER JOIN	compra c on c.codEstoque = e.codigo
+WHERE c.codigo = '15051'
 
---2) Consultar nome do livro, quantidade comprada e valor de compra da compra 15051 / feito
-select l.nome, c.qtdComprada, c.valor
-from compra c
-join estoque l on c.codEstoque = l.codigo
-where c.codigo = 15051
---3) Consultar Nome do livro e site da editora dos livros da Makron books / feito (Caso o site tenha mais de 10 dígitos, remover o www.).
-select l.nome, ed.site
-from estoque l
-join editora ed on ed.codigo = l.codEditora
-where ed.nome = 'Makron books'
+--3) Consultar Nome do livro e site da editora dos livros da Makron books (Caso o site tenha mais de 10 dï¿½gitos, remover o www.).
+SELECT e.nome, REPLACE(edi.site, 'www.', '') AS SiteEditora 
+FROM estoque e
+INNER JOIN editora edi on edi.codigo = e.codEditora
+WHERE edi.nome LIKE '%Makron Books%'
 
---4) Consultar nome do livro e Breve Biografia do David Halliday / feita
-select l.nome, a.biografia
-from estoque l
-join autor a on l.codAutor = a.codigo
-where a.nome = 'David Halliday'
+--4) Consultar nome do livro e Breve Biografia do David Halliday
+SELECT e.nome, a.biografia
+FROM estoque e 
+INNER JOIN autor a on a.codigo = e.codAutor
+WHERE a.nome = 'David Halliday'
 
---5) Consultar código de compra e quantidade comprada do livro Sistemas Operacionais Modernos / feito
-select c.codigo, c.qtdComprada
-from compra c
-join estoque l on l.codigo = c.codEstoque
-where l.nome = 'Sistemas Operacionais Modernos'
+--5) Consultar cï¿½digo de compra e quantidade comprada do livro Sistemas Operacionais Modernos
+SELECT e.codigo, quantidade
+FROM estoque e
+WHERE e.nome = 'Sistemas Operacionais Modernos'
 
---6) Consultar quais livros não foram vendidos
-select l.nome
-from estoque l
-join compra c on c.codEstoque = l.codigo
-where  is null
---7) Consultar quais livros foram vendidos e não estão cadastrados	
---8) Consultar Nome e site da editora que não tem Livros no estoque (Caso o site tenha mais de 10 dígitos, remover o www.)	
---9) Consultar Nome e biografia do autor que não tem Livros no estoque (Caso a biografia inicie com Doutorado, substituir por Ph.D.)	
+--6) Consultar quais livros nï¿½o foram vendidos
+SELECT e.*
+FROM estoque e
+LEFT JOIN compra c on c.codEstoque = e.codigo
+WHERE c.codEstoque IS NULL
+
+--7) Consultar quais livros foram vendidos e nï¿½o estï¿½o cadastrados	
+SELECT c.*
+FROM compra c
+LEFT JOIN estoque e on c.codEstoque = e.codigo
+WHERE e.codigo IS NULL
+
+--8) Consultar Nome e site da editora que nï¿½o tem Livros no estoque (Caso o site tenha mais de 10 dï¿½gitos, remover o www.)	
+--9) Consultar Nome e biografia do autor que nï¿½o tem Livros no estoque (Caso a biografia inicie com Doutorado, substituir por Ph.D.)	
 --10) Consultar o nome do Autor, e o maior valor de Livro no estoque. Ordenar por valor descendente	
---11) Consultar o código da compra, o total de livros comprados e a soma dos valores gastos. Ordenar por Código da Compra ascendente.	
---12) Consultar o nome da editora e a média de preços dos livros em estoque.Ordenar pela Média de Valores ascendente.	
---13) Consultar o nome do Livro, a quantidade em estoque o nome da editora, o site da editora (Caso o site tenha mais de 10 dígitos, remover o www.), criar uma coluna status onde:	
+--11) Consultar o cï¿½digo da compra, o total de livros comprados e a soma dos valores gastos. Ordenar por Cï¿½digo da Compra ascendente.	
+--12) Consultar o nome da editora e a mï¿½dia de preï¿½os dos livros em estoque.Ordenar pela Mï¿½dia de Valores ascendente.	
+--13) Consultar o nome do Livro, a quantidade em estoque o nome da editora, o site da editora (Caso o site tenha mais de 10 dï¿½gitos, remover o www.), criar uma coluna status onde:	
 --	Caso tenha menos de 5 livros em estoque, escrever Produto em Ponto de Pedido
 --	Caso tenha entre 5 e 10 livros em estoque, escrever Produto Acabando
 --	Caso tenha mais de 10 livros em estoque, escrever Estoque Suficiente
---	A Ordenação deve ser por Quantidade ascendente
---14) Para montar um relatório, é necessário montar uma consulta com a seguinte saída: Código do Livro, Nome do Livro, Nome do Autor, Info Editora (Nome da Editora + Site) de todos os livros	
---	Só pode concatenar sites que não são nulos
---15) Consultar Codigo da compra, quantos dias da compra até hoje e quantos meses da compra até hoje	
---16) Consultar o código da compra e a soma dos valores gastos das compras que somam mais de 200.00	
+--	A Ordenaï¿½ï¿½o deve ser por Quantidade ascendente
+--14) Para montar um relatï¿½rio, ï¿½ necessï¿½rio montar uma consulta com a seguinte saï¿½da: Cï¿½digo do Livro, Nome do Livro, Nome do Autor, Info Editora (Nome da Editora + Site) de todos os livros	
+--	Sï¿½ pode concatenar sites que nï¿½o sï¿½o nulos
+--15) Consultar Codigo da compra, quantos dias da compra atï¿½ hoje e quantos meses da compra atï¿½ hoje	
+--16) Consultar o cï¿½digo da compra e a soma dos valores gastos das compras que somam mais de 200.00	
